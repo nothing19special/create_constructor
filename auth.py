@@ -4,10 +4,10 @@ from playwright.async_api import async_playwright, expect
 
 # 1. Функция авторизации (принимает page)
 async def login(page):
-    await page.goto('https://admin.business.test01.russpass.dev')
+    await page.goto('https://business.test01.russpass.dev/signin?backUri=%2Fpersonal')
 
-    await page.get_by_placeholder('Введите эл. почту').fill('nptf@test.test')
-    await page.get_by_placeholder('Введите пароль').fill('AUTOTEST12345')
+    await page.get_by_placeholder('Введите эл. почту').fill('s.medownikov+73@notamedia.com.ru')
+    await page.get_by_placeholder('Введите пароль').fill('s.medownikov+73@notamedia.com.ru1')
 
     # Кликаем на кнопку входа
     await page.locator('form > button').click()
