@@ -3,11 +3,10 @@ import os
 from playwright.async_api import async_playwright, expect
 
 
-count_pages = os.getenv('COUNT_PAGE')
-count_section = os.getenv('COUNT_SECTION')
+count_pages = int(os.getenv('COUNT_PAGES'))
+count_section = int(os.getenv('COUNT_SECTION'))
 questions_used = os.getenv('QUESTIONS_USED')
 event_id = os.getenv('EVENT_ID')
-dev_env = os.getenv('DEV_ENV')
 
 
 
@@ -29,7 +28,7 @@ async def login(page):
 # 2. Новая функция для действий внутри (тоже принимает page)
 async def create_service(page):
     #Переход в конструктор
-    await page.goto('https://admin.business.test01.russpass.dev/events-control/f4ad5aa5-0c78-4411-8cd2-e7868c30d6ee')
+    await page.goto(f'https://admin.business.test01.russpass.dev/events-control/{event_id}')
     #Костыль, чтобы сохранить текущую логику перебора. Пока просто будет удаляться в конце
     await page.locator('#eventsConstructor').click()
     await page.get_by_placeholder('Введите текст вопроса').fill('Вопрос')
