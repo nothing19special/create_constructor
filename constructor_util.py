@@ -41,7 +41,7 @@ async def create_service(page):
 
         # Создание страницы. Если уже есть страницы на разделе
         await page.locator('[data-test="addPageButton"]').click()
-        await page.get_by_placeholder('Введите название страницы').fill(f'Страница {i}')
+        await page.get_by_placeholder('Введите название страницы').fill(f'Страница {i+1}')
         await page.locator('[data-test="addButton"]').click()
 
         # Создание раздела
@@ -51,7 +51,7 @@ async def create_service(page):
             btn2 = page.locator('[data-test-value="modal:constructorSection"]').last
             await btn2.wait_for(state="attached", timeout=5000)
             await btn2.evaluate("node => node.click()")
-            await page.get_by_placeholder('Введите название раздела').fill(f'Раздел номер {k}')
+            await page.get_by_placeholder('Введите название раздела').fill(f'Раздел номер {k+1}')
             await page.locator('[data-test="addButton"]').click()
 
             # Создание вопроса
