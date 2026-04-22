@@ -87,6 +87,9 @@ async def create_service(page):
                 await page.locator('[name="checkboxAppraiseCantAnswer"]').click()
                 await page.locator('[data-test="addButton"]').click()
 
+    await page.get_by_text('Сохранить черновик').click()
+    await page.wait_for_timeout(5000)
+
 
 
 
@@ -108,8 +111,8 @@ async def main():
         await create_service(page)
 
         # Чтобы браузер не закрылся сразу
-        print("Работа завершена, жду в режиме паузы...")
-        await page.pause()
+        print("Работа завершена, сэр. Пошел отдыхать")
+        await page.close()
 
 
 asyncio.run(main())
