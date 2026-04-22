@@ -5,7 +5,7 @@ from playwright.async_api import async_playwright, expect
 
 count_pages = int(os.getenv('COUNT_PAGES'))
 count_section = int(os.getenv('COUNT_SECTION'))
-questions_used = os.getenv('QUESTIONS_USED')
+questions_used = os.environ['QUESTIONS_USED'].split(',')
 event_id = os.getenv('EVENT_ID')
 
 
@@ -31,64 +31,65 @@ async def create_service(page):
     await page.goto(f'https://admin.business.test01.russpass.dev/events-control/{event_id}')
     #Костыль, чтобы сохранить текущую логику перебора. Пока просто будет удаляться в конце
     await page.locator('#eventsConstructor').click()
+    await page.locator('[data-test="addQuestion"]').click()
     await page.get_by_placeholder('Введите текст вопроса').fill('Вопрос')
     await page.get_by_text('Выберите тип вопроса').click()
     await page.get_by_text('Ссылки').last.click()
+    await page.locator('[data-test="addButton"]').click()
 
     for i in range(count_pages):
 
         # Создание страницы. Если уже есть страницы на разделе
         await page.locator('[data-test="addPageButton"]').click()
-        await page.get_by_placeholder('Введите название страницы').fill(f'Страница {count_pages}')
+        await page.get_by_placeholder('Введите название страницы').fill(f'Страница {i}')
         await page.locator('[data-test="addButton"]').click()
 
         # Создание раздела
-        for i in range(count_section):
+        for k in range(count_section):
             divider1 = page.locator(".CreateElement_divider__PeTfV").last
             await divider1.click()
             btn2 = page.locator('[data-test-value="modal:constructorSection"]').last
             await btn2.wait_for(state="attached", timeout=5000)
             await btn2.evaluate("node => node.click()")
-            await page.get_by_placeholder('Введите название раздела').fill(f'Раздел номер {count_section}')
+            await page.get_by_placeholder('Введите название раздела').fill(f'Раздел номер {k}')
             await page.locator('[data-test="addButton"]').click()
 
-    #Инициализация типов вопросов
+            # Создание вопроса
+            for j in questions_used:
+                await page.locator(".CreateElement_divider__PeTfV").last.click()
+                btn2 = page.locator('[data-test-value="modal:constructorQuestion"]').last
+                await btn2.wait_for(state="attached", timeout=1000)
+                await btn2.evaluate("node => node.click()")
 
-    # Создание вопроса
-    k = 0
-    for j in questions_used:
-        await page.locator(".CreateElement_divider__PeTfV").first.click()
-        btn2 = page.locator('[data-test-value="modal:constructorQuestion"]').first
-        await btn2.wait_for(state="attached", timeout=1000)
-        await btn2.evaluate("node => node.click()")
+                await page.get_by_placeholder('Введите текст вопроса').fill(j)
+                await page.get_by_text('Выберите тип вопроса').click()
+                await page.get_by_text(j).last.click()
 
-        await page.get_by_placeholder('Введите текст вопроса').fill(j)
-        await page.get_by_text('Выберите тип вопроса').click()
-        await page.get_by_text(j).last.click()
+                element_text = await page.locator('[data-test="selectOneQuestionType"]').inner_text()
+                text_validate_types = ['Один вариант ответа', 'Несколько вариантов ответа', 'Приоритизация']
+                if any(q_type in element_text for q_type in text_validate_types):
+                    for answer in ['Первый вариант', 'Второй вариант', 'Третий вариант']:
+                        await page.get_by_placeholder('Введите ответ').fill(answer)
+                        await page.keyboard.press('Enter')
 
-        element_text = await page.locator('[data-test="selectOneQuestionType"]').inner_text()
-        text_validate_types = ['Один вариант ответа', 'Несколько вариантов ответа', 'Приоритизация']
-        if any(q_type in element_text for q_type in text_validate_types):
-            for answer in ['Первый вариант', 'Второй вариант', 'Третий вариант']:
-                await page.get_by_placeholder('Введите ответ').fill(answer)
-                await page.keyboard.press('Enter')
+                table_validate_types = ['Таблица с файлами', 'Таблица с полями', 'Таблица со списком']
+                if any(q_type in element_text for q_type in table_validate_types):
+                    for answer in ['Первый вариант', 'Второй вариант', 'Третий вариант']:
+                        await page.get_by_placeholder('Введите название колонки').fill(answer)
+                        await page.keyboard.press('Enter')
+                    # Значение выпадающего списка
+                    if 'Таблица со списком' in element_text:
+                        for answer in ['Первый вариант', 'Второй вариант', 'Третий вариант']:
+                            await page.get_by_placeholder('Введите ответ').fill(answer)
+                            await page.keyboard.press('Enter')
 
-
-        table_validate_types = ['Таблица с файлами','Таблица с полями','Таблица со списком']
-        if any(q_type in element_text for q_type in table_validate_types):
-            for answer in ['Первый вариант', 'Второй вариант', 'Третий вариант']:
-                await page.get_by_placeholder('Введите название колонки').fill(answer)
-                await page.keyboard.press('Enter')
-            # Значение выпадающего списка
-            if 'Таблица со списком' in element_text:
-                for answer in ['Первый вариант', 'Второй вариант', 'Третий вариант']:
-                    await page.get_by_placeholder('Введите ответ').fill(answer)
-                    await page.keyboard.press('Enter')
+                await page.locator('[name="checkQuestionRequired"]').click()
+                await page.locator('[name="checkboxAppraiseCantAnswer"]').click()
+                await page.locator('[data-test="addButton"]').click()
 
 
-        await page.locator('[name="checkQuestionRequired"]').click()
-        await page.locator('[name="checkboxAppraiseCantAnswer"]').click()
-        await page.locator('[data-test="addButton"]').click()
+
+
 
 
 
