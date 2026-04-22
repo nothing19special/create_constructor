@@ -8,7 +8,7 @@ count_section = int(os.getenv('COUNT_SECTION'))
 questions_used = os.environ['QUESTIONS_USED'].split(',')
 event_id = os.getenv('EVENT_ID')
 
-
+print(f'DEBUG: original={questions_used}')
 
 
 # 1. Функция авторизации
